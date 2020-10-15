@@ -39,20 +39,21 @@ class ToDoCoreDataViewController: UIViewController {
     
     @IBAction func addDo(_ sender: UIButton) {
         if doElTextField.text != "" {
-            saveName(doingName: doElTextField.text!)
+            saveName(doingName: doElTextField.text!, todo: false)
             self.toDoTableView.reloadData()
         }
     }
     
     //Сохранение данных в CoreData
     
-    func saveName(doingName: String) {
+    func saveName(doingName: String, todo: Bool) {
         
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let managedContext = appDelegate.persistentContainer.viewContext
         let entity = NSEntityDescription.entity(forEntityName: "ToDo2",in: managedContext)!
         let doing = NSManagedObject(entity: entity, insertInto: managedContext)
         doing.setValue(doingName, forKeyPath: "doingName")
+        doing.setValue(todo, forKey: "todo")
         do {
             try managedContext.save()
             todoList.append(doing)
@@ -72,6 +73,9 @@ extension ToDoCoreDataViewController: UITableViewDataSource, UITableViewDelegate
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "CoreDataToDo") as! ToDoCoreDataTableViewCell
         cell.todoLabel.text = (todoList[indexPath.row].value(forKey: "doingName") as! String)
+        if (todoList[indexPath.row].value(forKey: "todo") as! Bool){
+            cell.backgroundColor = UIColor.green
+        } else{ cell.backgroundColor = UIColor.white }
         return cell
     }
     
@@ -89,6 +93,22 @@ extension ToDoCoreDataViewController: UITableViewDataSource, UITableViewDelegate
             }
             self.toDoTableView.deleteRows(at: [indexPath], with: .automatic)
         }
-        return [delete]
+        
+        let change = UITableViewRowAction(style: .normal, title: "Do") { (_, indexPath) in
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+            let managedContext = appDelegate?.persistentContainer.viewContext
+            
+            self.todoList[indexPath.row].setValue(true, forKey: "todo")
+            
+            do {
+                try managedContext?.save()
+            } catch let error as NSError {
+                print("Could not save. \(error), \(error.userInfo)")
+            }
+            
+            
+            self.toDoTableView.cellForRow(at: indexPath)?.backgroundColor = UIColor.green
+        }
+        return [delete, change]
     }
 }

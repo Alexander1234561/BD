@@ -22,6 +22,7 @@ class ToDoRealmViewController: UIViewController {
         if doElTextField.text != ""{
             let todo = ToDo()
             todo.nameDo = doElTextField.text!
+            todo.todo = false
             try! realm.write{realm.add(todo)}
             self.toDoTableView.reloadData()
         }
@@ -36,6 +37,9 @@ extension ToDoRealmViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoRealm") as! ToDoRealmTableViewCell
         cell.todoLabel.text = realm.objects(ToDo.self)[indexPath.row].nameDo
+        if (realm.objects(ToDo.self)[indexPath.row].todo){
+            cell.backgroundColor = UIColor.green
+        } else{ cell.backgroundColor = UIColor.white }
         return cell
     }
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
@@ -45,6 +49,12 @@ extension ToDoRealmViewController: UITableViewDelegate, UITableViewDataSource{
             try! self.realm.write{self.realm.delete(td)}
             self.toDoTableView.deleteRows(at: [indexPath], with: .automatic)
         }
-        return [delete]
+        
+        let change = UITableViewRowAction(style: .normal, title: "Do") { (c, indexPath) in
+            let td = self.realm.objects(ToDo.self)[indexPath.row]
+            try! self.realm.write{ td.todo = true }
+            self.toDoTableView.cellForRow(at: indexPath)?.backgroundColor = UIColor.green
+        }
+        return [delete, change]
     }
 }

@@ -16,11 +16,12 @@ class AlamViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.currentWeatherLabel.text = "\(self.realm.objects(WeatherM.self).first!.des)"
-        self.currentDateLabel.text = "\(self.realm.objects(WeatherM.self).first!.time)"
-        self.weatherImage.image = self.imageChoice(data: self.realm.objects(WeatherM.self).first!)
-        self.currentTemperature.text = self.realm.objects(WeatherM.self).first!.temp
-        
+        if realm.objects(WeatherM.self).count != 0  {
+            self.currentWeatherLabel.text = "\(self.realm.objects(WeatherM.self).first!.des)"
+            self.currentDateLabel.text = "\(self.realm.objects(WeatherM.self).first!.time)"
+            self.weatherImage.image = self.imageChoice(data: self.realm.objects(WeatherM.self).first!)
+            self.currentTemperature.text = self.realm.objects(WeatherM.self).first!.temp
+        }
         LoadedData.loadWeatherInMoscow(completion: {weather in
             for i in self.realm.objects(WeatherM.self){
                 try! self.realm.write{ self.realm.delete(i) }

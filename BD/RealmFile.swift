@@ -11,4 +11,5 @@ import Foundation
 
 class ToDo: Object{
     @objc dynamic var nameDo = ""
+    @objc dynamic var todo = false
 }
